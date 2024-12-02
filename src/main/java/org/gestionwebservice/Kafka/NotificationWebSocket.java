@@ -7,13 +7,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.server.ServerEndpoint;
-
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.ServerEndpoint;
 
 @ServerEndpoint("/employee-events")
 @ApplicationScoped
@@ -24,12 +24,20 @@ public class NotificationWebSocket {
     @OnOpen
     public void onOpen(Session session) {
         sessions.add(session);
+        System.out.println("WebSocket opened: " + session.getId());
     }
 
     @OnClose
     public void onClose(Session session) {
         sessions.remove(session);
+        System.out.println("WebSocket closed: " + session.getId());
     }
+    
+     @OnMessage
+    public void onMessage(String message, Session session) {
+        System.out.println("Message received: " + message);
+    }
+
 
     @OnError
     public void onError(Session session, Throwable throwable) {
@@ -37,6 +45,7 @@ public class NotificationWebSocket {
         Logger.getLogger(NotificationWebSocket.class.getName())
                 .log(Level.SEVERE, "WebSocket error", throwable);
     }
+
 
     public void broadcast(String message) {
         synchronized (sessions) {

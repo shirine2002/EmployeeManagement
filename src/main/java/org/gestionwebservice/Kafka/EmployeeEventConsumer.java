@@ -16,7 +16,7 @@ public class EmployeeEventConsumer {
     @Inject
     NotificationWebSocket webSocket;
 
-    @Incoming("employee-updates")
+    @Incoming("employee-notifications-in")
     public void consume(String message) {
         try {
             LOGGER.info("Received Kafka event: " + message);

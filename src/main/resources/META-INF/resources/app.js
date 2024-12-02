@@ -13,37 +13,31 @@ function connectWebSocket() {
         console.log("WebSocket connected.");
         reconnectAttempts = 0; 
     };
+
     socket.onmessage = (event) => {
-        console.log("Raw WebSocket message received:", event.data);
-    
-        try {
-            const notification = JSON.parse(event.data);
-            console.log("Parsed WebSocket message:", notification);
-    
-            const { action, name, department, title } = notification;
-    
-            let message;
-            switch (action) {
-                case "CREATE":
-                    message = `Employee Created: ${name} (${department}, ${title})`;
-                    break;
-                case "UPDATE":
-                    message = `Employee Updated: ${name} (${department}, ${title})`;
-                    break;
-                case "DELETE":
-                    message = `Employee Deleted: ${name} (${department}, ${title})`;
-                    break;
-                default:
-                    message = "Unknown action received.";
-            }
-    
-            alert(message); 
-            console.log(`Notification displayed: ${message}`);
-            fetchEmployees(); 
-        } catch (error) {
-            console.error("Error processing WebSocket message:", error);
-        }
-    };
+    const notification = JSON.parse(event.data);
+    const { action, name, department, title } = notification;
+
+    let message;
+    switch (action) {
+        case "CREATE":
+            message = `Employee Created`;
+            break;
+        case "UPDATE":
+            message = `Employee Updated`;
+            break;
+        case "DELETE":
+            message = `Employee Deleted`;
+            break;
+        default:
+            message = "Unknown action received.";
+    }
+
+    alert(message);
+    console.log(`WebSocket Notification: ${message}`);
+    fetchEmployees();
+};
+
     
     socket.onclose = () => {
         if (reconnectAttempts < maxReconnectAttempts) {
