@@ -1,4 +1,4 @@
-package org.gestionwebservice;
+package org.gestionwebservice.Controllers;
 
 import java.util.List;
 
@@ -6,9 +6,16 @@ import org.gestionwebservice.Domain.Employee;
 import org.gestionwebservice.Kafka.EmployeeEventProducer;
 import org.gestionwebservice.Repository.EmployeeRepository;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
 @Path("/employees")
@@ -26,6 +33,7 @@ public class EmployeeController {
     }
 
     @GET
+    @PermitAll  //there are no roles defined here anyone can access it 
     @Path("/{id}")
     public Response getEmployeeById(@PathParam("id") Long id) {
         return employeeRepository.findByIdOptional(id)
@@ -34,6 +42,7 @@ public class EmployeeController {
     }
 
     @POST
+    @RolesAllowed("admin")
     @Transactional
     public Response createEmployee(Employee employee) {
         employeeRepository.persist(employee);
@@ -42,6 +51,7 @@ public class EmployeeController {
     }
 
     @PUT
+    @RolesAllowed("admin")
     @Path("/{id}")
     @Transactional
     public Response updateEmployee(@PathParam("id") Long id, Employee updatedEmployee) {
@@ -57,6 +67,7 @@ public class EmployeeController {
     }
 
     @DELETE
+    @RolesAllowed("admin")
     @Path("/{id}")
     @Transactional
     public Response deleteEmployee(@PathParam("id") Long id) {

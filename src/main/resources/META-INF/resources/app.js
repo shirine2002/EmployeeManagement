@@ -6,6 +6,20 @@ const resetButton = document.getElementById("resetButton");
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 5;
 
+// Helper function to retrieve headers with Authorization token
+function getAuthHeaders() {
+    const token = localStorage.getItem("jwt");
+    if (!token) {
+        alert("No token found. Please log in.");
+        window.location.href = "/login.html";
+        return {};
+    }
+    return {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    };
+}
+
 function connectWebSocket() {
     const socket = new WebSocket("ws://localhost:8083/employee-events");
 
@@ -15,30 +29,29 @@ function connectWebSocket() {
     };
 
     socket.onmessage = (event) => {
-    const notification = JSON.parse(event.data);
-    const { action, name, department, title } = notification;
+        const notification = JSON.parse(event.data);
+        const { action } = notification;
 
-    let message;
-    switch (action) {
-        case "CREATE":
-            message = `Employee Created`;
-            break;
-        case "UPDATE":
-            message = `Employee Updated`;
-            break;
-        case "DELETE":
-            message = `Employee Deleted`;
-            break;
-        default:
-            message = "Unknown action received.";
-    }
+        let message;
+        switch (action) {
+            case "CREATE":
+                message = `Employee Created`;
+                break;
+            case "UPDATE":
+                message = `Employee Updated`;
+                break;
+            case "DELETE":
+                message = `Employee Deleted`;
+                break;
+            default:
+                message = "Unknown action received.";
+        }
 
-    alert(message);
-    console.log(`WebSocket Notification: ${message}`);
-    fetchEmployees();
-};
+        alert(message);
+        console.log(`WebSocket Notification: ${message}`);
+        fetchEmployees();
+    };
 
-    
     socket.onclose = () => {
         if (reconnectAttempts < maxReconnectAttempts) {
             reconnectAttempts++;
@@ -55,7 +68,9 @@ function connectWebSocket() {
 connectWebSocket();
 
 function fetchEmployees() {
-    fetch(apiBase)
+    fetch(apiBase, {
+        headers: getAuthHeaders()
+    })
         .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch employees");
             return res.json();
@@ -86,9 +101,7 @@ function fetchEmployees() {
 function createEmployee(employee) {
     fetch(apiBase, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(employee)
     })
         .then(() => fetchEmployees())
@@ -101,9 +114,7 @@ function createEmployee(employee) {
 function updateEmployee(id, employee) {
     fetch(`${apiBase}/${id}`, {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(employee)
     })
         .then(() => fetchEmployees())
@@ -115,7 +126,8 @@ function updateEmployee(id, employee) {
 
 function deleteEmployee(id) {
     fetch(`${apiBase}/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: getAuthHeaders()
     })
         .then(() => fetchEmployees())
         .catch((err) => {
@@ -125,7 +137,9 @@ function deleteEmployee(id) {
 }
 
 function editEmployee(id) {
-    fetch(`${apiBase}/${id}`)
+    fetch(`${apiBase}/${id}`, {
+        headers: getAuthHeaders()
+    })
         .then((res) => {
             if (!res.ok) throw new Error("Failed to fetch employee details");
             return res.json();
@@ -167,4 +181,5 @@ resetButton.addEventListener("click", () => {
     employeeForm.reset();
 });
 
+// Fetch initial employees
 fetchEmployees();

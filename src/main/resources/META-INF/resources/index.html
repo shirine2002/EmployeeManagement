@@ -1,40 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Management</title>
-    <link rel="stylesheet" href="styles.css">
+  <title>Gestion Employés</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+    }
+    .center-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+    .form-group {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    label {
+      font-weight: bold;
+      color: #555;
+    }
+    .form-control {
+      border: 2px solid #007bff;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Employee Management</h1>
-
-        <form id="employeeForm">
-            <input type="hidden" id="employeeId">
-            <label for="name">Name:</label>
-            <input type="text" id="name" required>
-            <label for="department">Department:</label>
-            <input type="text" id="department" required>
-            <label for="title">Title:</label>
-            <input type="text" id="title" required>
-            <button type="submit">Save</button>
-            <button type="button" id="resetButton">Reset</button>
+<div id="loginForm" class="center-container">
+    <div  class="container" style="max-width: 500px;">
+        <h1 class="text-center">Authentication Form</h1>
+        <form action="/login" method="POST">
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+          </div>
+          <div class="form-group">
+            <label for="pwd">Password:</label>
+            <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="password">
+          </div>
+          <div class="checkbox">
+            <label><input type="checkbox" name="remember"> Remember me</label>
+          </div>
+          <button type="submit" class="btn btn-default">Submit</button>
         </form>
-
-        <h2>Employees</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Department</th>
-                    <th>Title</th>
-                </tr>
-            </thead>
-            <tbody id="employeeTable">
-            </tbody>
-        </table>
     </div>
-    <script src="app.js"></script>
+</div>
+
+
+<script>
+
+document.getElementById("loginForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("pwd").value.trim();
+
+    try {
+        const response = await fetch("/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: email, password: password }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            // Store JWT and role in localStorage
+            localStorage.setItem("jwt", data.token);
+            localStorage.setItem("role", data.role);
+
+            window.location.href = "/employeeManagement.html";
+        } else {
+            alert("Invalid credentials. Please try again.");
+        }
+    } catch (error) {
+        console.error("Error during login:", error);
+        alert("Something went wrong. Please try again.");
+    }
+});
+
+</script>
 </body>
 </html>
